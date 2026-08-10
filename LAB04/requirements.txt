@@ -1,7 +1,6 @@
-**Libraries และ Packages ที่ใช้**
-    - pandas
-    - numpy
-    - scikit-learn
-    - matplotlib
-    - seaborn
-    - tensorflow
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+tensorflow
