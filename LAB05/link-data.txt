@@ -1,0 +1,3 @@
+* **ข้อมูลอ้างอิง**
+Adult income dataset for KNN Classification and Clustering
+Kaggle : https://www.kaggle.com/datasets/wenruliu/adult-income-dataset
