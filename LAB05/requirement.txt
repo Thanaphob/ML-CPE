@@ -1,10 +1,5 @@
-ไลบรารีที่จำเป็นต้องใช้ในโปรเจกต์นี้:
-- Python 3
-- pandas
-- numpy
-- scikit-learn
-- joblib
-- matplotlib
-
-คำสั่งสำหรับติดตั้งไลบรารีทั้งหมด:
-pip install -r requirements.txt
+pandas
+numpy
+scikit-learn
+joblib
+matplotlib
