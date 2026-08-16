@@ -5,28 +5,26 @@
 
 
 [1] PROJECT STRUCTURE
-------------------------------------------------------------------------
+
+```text
 ML-05-SVM/
-│
 ├── data_adult_income/
-│   └── adult.csv               # ไฟล์ชุดข้อมูล CSV จาก Kaggle/UCI
-│
+│   └── adult.csv           # ไฟล์ชุดข้อมูล CSV จาก Kaggle/UCI
 ├── classification/
-│   ├── main.py                 # สคริปต์หลักสำหรับรัน Pipeline ทั้งหมด
-│   ├── data_loader.py          # โหลดไฟล์ CSV และลบค่าสูญหาย (Missing values '?')
-│   ├── preprocessing.py       # ทำ One-Hot Encoding และ Feature Scaling (StandardScaler)
-│   ├── split_data.py           # แบ่งข้อมูลเป็น Train (80%) และ Test (20%)
-│   ├── svm_model.py            # สร้างและเทรนแบบจำลอง SVM Classifier (Kernel RBF)
-│   ├── evaluate.py             # ประเมินผลโมเดล (Accuracy, Classification Report, Confusion Matrix)
-│   └── outputs/                # โฟลเดอร์เก็บผลลัพธ์อัตโนมัติหลังรันเสร็จ
-│       ├── scaler.pkl          # เซฟตัวปรับสเกลข้อมูล (StandardScaler)
-│       ├── svm_model.pkl       # เซฟโมเดล SVM ที่เทรนเสร็จแล้ว
-│       ├── classes.json        # บันทึก Mapping ของ Class Target
+│   ├── main.py             # สคริปต์หลักสำหรับรัน Pipeline ทั้งหมด
+│   ├── data_loader.py      # โหลดไฟล์ CSV และลบค่าสูญหาย (Missing values '?')
+│   ├── preprocessing.py    # ทำ One-Hot Encoding และ Feature Scaling (StandardScaler)
+│   ├── split_data.py       # แบ่งข้อมูลเป็น Train (80%) และ Test (20%)
+│   ├── svm_model.py        # สร้างและเทรนแบบจำลอง SVM Classifier (Kernel RBF)
+│   ├── evaluate.py         # ประเมินผลโมเดล (Accuracy, Classification Report, Confusion Matrix)
+│   └── outputs/            # โฟลเดอร์เก็บผลลัพธ์อัตโนมัติหลังรันเสร็จ
+│       ├── scaler.pkl      # เซฟตัวปรับสเกลข้อมูล (StandardScaler)
+│       ├── svm_model.pkl   # เซฟโมเดล SVM ที่เทรนเสร็จแล้ว
+│       ├── classes.json    # บันทึก Mapping ของ Class Target
 │       └── confusion_matrix.png # รูปภาพกราฟแสดง Confusion Matrix
-│
-├── requirements.txt            # รายชื่อ Python Libraries ที่จำเป็น
-├── link-data.txt               # ลิงก์ที่มาของ Dataset
-└── README.txt                  # อธิบายรายละเอียดโปรเจกต์และการใช้งาน
+├── requirements.txt        # รายชื่อ Python Libraries ที่จำเป็น
+├── link-data.txt           # ลิงก์ที่มาของ Dataset
+└── README.txt              # อธิบายรายละเอียดโปรเจกต์และการใช้งาน
 
 
 [2] REQUIREMENTS & INSTALLATION
