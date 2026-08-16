@@ -1,5 +1,7 @@
-         LAB 05: Support Vector Machine (SVM) Classification
+
+             # LAB 05: Support Vector Machine (SVM) Classification
                    Dataset: Adult Income Dataset
+
 
 [1] PROJECT STRUCTURE
 
