@@ -3,9 +3,8 @@
 ## Dataset: Adult Income Dataset
 
 
-[1] PROJECT STRUCTURE
-
 ```text
+[1] PROJECT STRUCTURE
 ML-05-SVM/
 ├── data_adult_income/
 │   └── adult.csv           # ไฟล์ชุดข้อมูล CSV จาก Kaggle/UCI
