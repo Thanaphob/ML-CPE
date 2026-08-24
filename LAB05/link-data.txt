@@ -1,3 +1,4 @@
 * **ข้อมูลอ้างอิง**
-Adult income dataset for KNN Classification and Clustering
+Adult income dataset
 Kaggle : https://www.kaggle.com/datasets/wenruliu/adult-income-dataset
+ที่มาของ Code ที่ใช้อ้างอิง : https://github.com/aproot-en/Machine-Learning-Course.git
