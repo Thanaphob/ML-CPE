@@ -57,7 +57,9 @@
           ▼
 [ evaluate.py ] ──────────> ประเมินผลลัพธ์ (Accuracy, Precision, Recall, Confusion Matrix)
 
-5. ผลการทดลองและการวัดผล (Experimental Results)
+---
+
+## 5. ผลการทดลองและการวัดผล (Experimental Results)
     จากการทดสอบกับ Test Set จำนวน 4,722 ตัวอย่าง
     --- Classification Report ---
                precision    recall  f1-score   support
@@ -75,13 +77,13 @@ Port Scan (1)       0.90      0.76      0.82       687
  False Positive (Normal ผิดเป็น Port Scan): 55 เคส (ต่ำมาก ลดปัญหาการแจ้งเตือนรบกวนผู้ดูแลระบบ)
  False Negative (Port Scan หลุดรอด): 168 เคส
 
- 6. จุดเด่นในการนำไปประยุกต์ใช้งานจริง (System Selling Points)
+ ## 6. จุดเด่นในการนำไปประยุกต์ใช้งานจริง (System Selling Points)
         Lightweight & High Efficiency: โมเดล SVM กินทรัพยากร CPU และ RAM ต่ำกว่า Deep Learning อย่างเห็นได้ชัด สามารถนำไปติดตั้งบนอุปกรณ์เครือข่ายระดับขอบเขต (Edge Gateway / Router / Firewall) ได้โดยตรง
 
         Low False Alarm Rate: ค่า Precision ฝั่งทราฟฟิกปกติสูงถึง 96% และมี False Positive เพียง 55 เคส ช่วยให้ระบบไม่บล็อก IP ของผู้ใช้งานทั่วไปโดยพลการ
 
         Early-stage Prevention: สกัดกั้นตั้งแต่ระยะสแกนพอร์ต ช่วยยับยั้งแผนการโจมตีก่อนที่ผู้ไม่หวังดีจะเริ่มส่ง Exploit เข้ามาสู่ระบบเครือข่าย
 
-วิธีการรันโปรเจกต์
+## วิธีการรันโปรเจกต์
     pip install -r requirement.txt (ติดตั้ง package)
     python main.py (Run main program)
