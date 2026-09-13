@@ -56,34 +56,41 @@
           │
           ▼
 [ evaluate.py ] ──────────> ประเมินผลลัพธ์ (Accuracy, Precision, Recall, Confusion Matrix)
+```
 
 ---
 
 ## 5. ผลการทดลองและการวัดผล (Experimental Results)
-    จากการทดสอบกับ Test Set จำนวน 4,722 ตัวอย่าง
-    --- Classification Report ---
-               precision    recall  f1-score   support
+จากการทดสอบกับ Test Set จำนวน **4,722 ตัวอย่าง**:
 
-   Normal (0)       0.96      0.99      0.97      4035
-Port Scan (1)       0.90      0.76      0.82       687
+| Metric | Normal (0) | Port Scan (1) | Overall |
+| :--- | :---: | :---: | :---: |
+| **Precision** | 0.96 | 0.90 | - |
+| **Recall** | 0.99 | 0.76 | - |
+| **F1-Score** | 0.97 | 0.82 | - |
+| **Accuracy** | - | - | **95%** |
 
-     accuracy                           0.95      4722
-    macro avg       0.93      0.87      0.90      4722
- weighted avg       0.95      0.95      0.95      4722
+### Confusion Matrix Breakdown:
+* **True Negative (Normal $\to$ Normal):** 3,980 เคส
+* **True Positive (Port Scan $\to$ Port Scan):** 519 เคส
+* **False Positive (Normal ผิดเป็น Port Scan):** 55 เคส (ต่ำมาก ลดปัญหาการแจ้งเตือนรบกวนผู้ดูแลระบบ)
+* **False Negative (Port Scan หลุดรอด):** 168 เคส
 
- Confusion Matrix Breakdown:
- True Negative (Normal to Normal): 3,980 เคส
- True Positive (Port Scan to Port Scan): 519 เคส
- False Positive (Normal ผิดเป็น Port Scan): 55 เคส (ต่ำมาก ลดปัญหาการแจ้งเตือนรบกวนผู้ดูแลระบบ)
- False Negative (Port Scan หลุดรอด): 168 เคส
+---
 
- ## 6. จุดเด่นในการนำไปประยุกต์ใช้งานจริง (System Selling Points)
-        Lightweight & High Efficiency: โมเดล SVM กินทรัพยากร CPU และ RAM ต่ำกว่า Deep Learning อย่างเห็นได้ชัด สามารถนำไปติดตั้งบนอุปกรณ์เครือข่ายระดับขอบเขต (Edge Gateway / Router / Firewall) ได้โดยตรง
+## 6. จุดเด่นในการนำไปประยุกต์ใช้งานจริง (System Selling Points)
+* **Lightweight & High Efficiency:** โมเดล SVM กินทรัพยากร CPU และ RAM ต่ำกว่า Deep Learning อย่างเห็นได้ชัด สามารถนำไปติดตั้งบนอุปกรณ์เครือข่ายระดับขอบเขต (Edge Gateway / Router / Firewall) ได้โดยตรง
+* **Low False Alarm Rate:** ค่า Precision ฝั่งทราฟฟิกปกติสูงถึง 96% และมี False Positive เพียง 55 เคส ช่วยให้ระบบไม่บล็อก IP ของผู้ใช้งานทั่วไปโดยพลการ
+* **Early-stage Prevention:** สกัดกั้นตั้งแต่ระยะสแกนพอร์ต ช่วยยับยั้งแผนการโจมตีก่อนที่ผู้ไม่หวังดีจะเริ่มส่ง Exploit เข้ามาสู่ระบบเครือข่าย
 
-        Low False Alarm Rate: ค่า Precision ฝั่งทราฟฟิกปกติสูงถึง 96% และมี False Positive เพียง 55 เคส ช่วยให้ระบบไม่บล็อก IP ของผู้ใช้งานทั่วไปโดยพลการ
+---
 
-        Early-stage Prevention: สกัดกั้นตั้งแต่ระยะสแกนพอร์ต ช่วยยับยั้งแผนการโจมตีก่อนที่ผู้ไม่หวังดีจะเริ่มส่ง Exploit เข้ามาสู่ระบบเครือข่าย
+## 7. วิธีการรันโปรเจกต์ (Usage)
 
-## วิธีการรันโปรเจกต์
-    pip install -r requirement.txt (ติดตั้ง package)
-    python main.py (Run main program)
+```bash
+# ติดตั้ง Library ที่จำเป็น
+pip install -r requirement.txt
+
+# รันโปรแกรมหลัก
+python main.py
+```
