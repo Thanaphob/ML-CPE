@@ -1,31 +1,31 @@
-from data_loader import load_network_data
+from data_loader import load_raw_logs
+from preprocessing import build_features
+from split_data import split_and_scale
+from svm_model import build_model, train_model
 from evaluate import evaluate_model
-from preprocessing import preprocess_data, scale_features
-from split_data import split_dataset
-from svm_model import train_svm
 
 
 def main():
-  data_path = 'data_NSL_KDD/NSL-KDD_Security_Network/KDDTrain+_20Percent.txt'
+    print(">> โหลด raw log ...")
+    raw_df = load_raw_logs("data/ssh_anomaly_dataset.csv")
+    print(f"   โหลดมาแล้ว {len(raw_df)} แถว")
 
-  print('1. Loading dataset...')
-  df = load_network_data(data_path)
+    print("\n>> แปลงเป็น feature vector (ต่อ IP ต่อ 1 นาที) ...")
+    feature_df = build_features(raw_df)
+    print(f"   ได้ {len(feature_df)} แถว")
+    print(f"   {feature_df['label'].value_counts().to_dict()}")
 
-  print('2. Preprocessing & Feature selection...')
-  X, y = preprocess_data(df)
+    print("\n>> แบ่ง train/test และ scale ...")
+    X_train, X_test, y_train, y_test, scaler = split_and_scale(feature_df)
+    print(f"   train: {len(X_train)} แถว, test: {len(X_test)} แถว")
 
-  print('3. Splitting dataset...')
-  X_train, X_test, y_train, y_test = split_dataset(X, y)
+    print("\n>> เทรน SVM ...")
+    model = build_model()
+    model = train_model(model, X_train, y_train)
 
-  print('4. Scaling features...')
-  X_train_scaled, X_test_scaled = scale_features(X_train, X_test)
-
-  print('5. Training SVM model...')
-  model = train_svm(X_train_scaled, y_train)
-
-  print('6. Evaluating model...')
-  evaluate_model(model, X_test_scaled, y_test)
+    print("\n>> ประเมินผล ...")
+    evaluate_model(model, X_test, y_test)
 
 
-if __name__ == '__main__':
-  main()
+if __name__ == "__main__":
+    main()

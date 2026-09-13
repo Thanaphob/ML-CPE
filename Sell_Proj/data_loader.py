@@ -1,52 +1,18 @@
 import pandas as pd
 
-COLUMNS = [
-    'duration',
-    'protocol_type',
-    'service',
-    'flag',
-    'src_bytes',
-    'dst_bytes',
-    'land',
-    'wrong_fragment',
-    'urgent',
-    'hot',
-    'num_failed_logins',
-    'logged_in',
-    'num_compromised',
-    'root_shell',
-    'su_attempted',
-    'num_root',
-    'num_file_creations',
-    'num_shells',
-    'num_access_files',
-    'num_outbound_cmds',
-    'is_host_login',
-    'is_guest_login',
-    'count',
-    'srv_count',
-    'serror_rate',
-    'srv_serror_rate',
-    'rerror_rate',
-    'srv_rerror_rate',
-    'same_srv_rate',
-    'diff_srv_rate',
-    'srv_diff_host_rate',
-    'dst_host_count',
-    'dst_host_srv_count',
-    'dst_host_same_srv_rate',
-    'dst_host_diff_srv_rate',
-    'dst_host_same_src_port_rate',
-    'dst_host_srv_diff_host_rate',
-    'dst_host_serror_rate',
-    'dst_host_srv_serror_rate',
-    'dst_host_rerror_rate',
-    'dst_host_srv_rerror_rate',
-    'attack_type',
-    'difficulty_level',
-]
+RAW_COLUMNS = ["timestamp", "source_ip", "username", "event_type", "status", "label", "detail"]
 
 
-def load_network_data(filepath):
-  df = pd.read_csv(filepath, names=COLUMNS)
-  return df
+def load_raw_logs(path: str) -> pd.DataFrame:
+    """โหลดไฟล์ log ดิบ แปลง timestamp ให้เป็น datetime"""
+    df = pd.read_csv(path)
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df = df.sort_values("timestamp").reset_index(drop=True)
+    return df
+
+
+if __name__ == "__main__":
+    df = load_raw_logs("data/ssh_anomaly_dataset.csv")
+    print(f"โหลดข้อมูลทั้งหมด {len(df)} แถว")
+    print(df["label"].value_counts())
+    print(df.head())

@@ -1,36 +1,30 @@
-import os
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import classification_report, confusion_matrix
 
+from sklearn.metrics import (
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    ConfusionMatrixDisplay,
+)
 
-def evaluate_model(model, X_test, y_test, output_dir='outputs'):
-  os.makedirs(output_dir, exist_ok=True)
-  y_pred = model.predict(X_test)
+def evaluate_model(model, X_test, y_test, output_path="outputs/confusion_matrix.png"):
+    y_pred = model.predict(X_test)
 
-  print('--- Classification Report ---')
-  print(
-      classification_report(
-          y_test, y_pred, target_names=['Normal (0)', 'Port Scan (1)']
-      )
-  )
+    acc = accuracy_score(y_test, y_pred)
+    print("=" * 50)
+    print(f"Accuracy: {acc:.4f}")
+    print("=" * 50)
+    print("Classification Report:")
+    print(classification_report(y_test, y_pred, target_names=["Normal", "Attack"]))
 
-  cm = confusion_matrix(y_test, y_pred)
-  plt.figure(figsize=(6, 4))
-  sns.heatmap(
-      cm,
-      annot=True,
-      fmt='d',
-      cmap='Blues',
-      xticklabels=['Normal', 'Port Scan'],
-      yticklabels=['Normal', 'Port Scan'],
-  )
-  plt.xlabel('Predicted Label')
-  plt.ylabel('True Label')
-  plt.title('SVM Port Scan Detection - Confusion Matrix')
-  plt.tight_layout()
+    cm = confusion_matrix(y_test, y_pred)
+    fig, ax = plt.subplots(figsize=(5, 5))
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Normal", "Attack"])
+    disp.plot(ax=ax, cmap="Blues", colorbar=False)
+    ax.set_title("Confusion Matrix - SSH Brute Force Detection")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+    print(f"\nบันทึก confusion matrix ไว้ที่ {output_path}")
 
-  save_path = os.path.join(output_dir, 'confusion_matrix.png')
-  plt.savefig(save_path, dpi=300)
-  print(f'Saved confusion matrix to {save_path}')
-  plt.show()
+    return acc, y_pred
