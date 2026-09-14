@@ -1,9 +1,12 @@
-<<<<<<< HEAD
 # Machine Learning (ML-CPE)
 
 Repository นี้จัดทำขึ้นเพื่อรวบรวม LAB และโปรเจกต์ต่างๆของรายวิชา Machine Learning
 
 ---
+
+* **ผู้เขียน (Author):** Thanaphob Buakaew (GitHub: [@Thanaphob](https://github.com/Thanaphob))
+
+--- 
 
 ## 📁 Repository Structure
 
@@ -23,10 +26,3 @@ Repository นี้จัดทำขึ้นเพื่อรวบรวม
 | [Final-Project](./Final-Project) | Final Project | ⏳ |
 
 ---
-
-* **ผู้เขียน (Author):** Thanaphob Buakaew (GitHub: [@Thanaphob](https://github.com/Thanaphob))
-
----
-=======
-# ML_CPE_Thanaphob
->>>>>>> 17c9f6da074d617f1f769732e371034ba3040c6c
