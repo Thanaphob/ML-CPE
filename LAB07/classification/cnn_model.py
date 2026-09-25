@@ -64,7 +64,7 @@ def train_model(X_train, y_train, X_val, y_val, num_classes,
             monitor="val_loss", patience=8, restore_best_weights=True
         ),
         keras.callbacks.ReduceLROnPlateau(
-            monitor="val_loss", factor=0.5, patience=3, min_lr=1e-5
+            monitor="val_loss", factor=0.5, patience=5, min_lr=1e-5
         ),
     ]
 

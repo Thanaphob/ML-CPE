@@ -65,19 +65,27 @@ def plot_confusion_matrix(matrix, classes, save_path):
     plt.close(fig)
 
 
-def plot_history(history, save_path):
+def smooth(values, weight=0.85):
+    smoothed = []
+    last = values[0]
+    for v in values:
+        last = last * weight + (1 - weight) * v
+        smoothed.append(last)
+    return smoothed
 
+
+def plot_history(history, save_path):
     fig, axes = plt.subplots(1, 2, figsize=(11, 4))
 
-    axes[0].plot(history.history["accuracy"], label="train")
-    axes[0].plot(history.history["val_accuracy"], label="validation")
+    axes[0].plot(smooth(history.history["accuracy"]), label="train")
+    axes[0].plot(smooth(history.history["val_accuracy"]), label="validation")
     axes[0].set_xlabel("Epoch")
     axes[0].set_ylabel("Accuracy")
     axes[0].set_title("Accuracy")
     axes[0].legend()
 
-    axes[1].plot(history.history["loss"], label="train")
-    axes[1].plot(history.history["val_loss"], label="validation")
+    axes[1].plot(smooth(history.history["loss"]), label="train")
+    axes[1].plot(smooth(history.history["val_loss"]), label="validation")
     axes[1].set_xlabel("Epoch")
     axes[1].set_ylabel("Loss")
     axes[1].set_title("Loss")
