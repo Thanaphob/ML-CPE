@@ -17,8 +17,8 @@ OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
 
 IMG_SIZE = 64
 VAL_SIZE = 0.1
-MAX_PER_CLASS = None
-EPOCHS = 20
+MAX_PER_CLASS = 1500
+EPOCHS = 15
 BATCH_SIZE = 64
 
 
