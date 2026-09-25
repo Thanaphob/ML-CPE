@@ -1,6 +1,6 @@
 # LAB07 - Convolutional Neural Network (CNN)
 
-โปรเจกต์นี้สร้าง CNN pipeline ด้วย Python สำหรับการจำแนกรูปภาพ (image recognition) ครอบคลุมตั้งแต่การโหลดภาพ, การ preprocess, การแบ่งชุดข้อมูล, การเทรนโมเดล CNN, การประเมินผล, ไปจนถึงการทำนาย
+โปรเจกต์นี้สร้าง CNN ด้วย Python สำหรับการจำแนกรูปภาพ (image recognition) ครอบคลุมตั้งแต่การโหลดภาพ, การ preprocess, การแบ่งชุดข้อมูล, การเทรนโมเดล CNN, การประเมินผล, ไปจนถึงการทำนาย
 
 ## ข้อมูล (Data)
 
@@ -37,7 +37,7 @@ LAB07/
 ```text
 LAB07/
 │
-├── data/                        # เก็บ dataset (ไม่ push ขึ้น git ดู .gitignore)
+├── data/                        
 │   ├── seg_train/
 │   └── seg_test/
 │
@@ -49,7 +49,7 @@ LAB07/
 │   ├── cnn_model.py             # สร้าง เทรน บันทึก และทำนายผลด้วยโมเดล CNN
 │   ├── evaluate.py              # คำนวณ accuracy, classification report, confusion matrix, กราฟการเทรน
 │   ├── test_cnn.py              # ทดสอบโมเดลที่เทรนแล้วด้วยภาพตัวอย่างแบบสุ่ม
-│   └── outputs/                 # ไฟล์ที่ถูกสร้างตอนรันโปรแกรม ไม่ push ขึ้น git
+│   └── outputs/                
 │       ├── features.npy
 │       ├── labels.npy
 │       ├── classes.json
@@ -112,5 +112,3 @@ CNN ประกอบด้วย 4 conv block (32 → 64 → 128 → 256 filte
 | `EPOCHS` | 15 |
 | `BATCH_SIZE` | 64 |
 | `VAL_SIZE` | 0.1 |
-
-ค่าเหล่านี้ถูกปรับลดจากค่าเริ่มต้น (`IMG_SIZE=100`, ใช้ข้อมูลทั้งหมด, `EPOCHS=30`, `BATCH_SIZE=32`) เพื่อลดเวลาในการเทรน โดยแลกกับความแม่นยำที่ลดลงเล็กน้อย
