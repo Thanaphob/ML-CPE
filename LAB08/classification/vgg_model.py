@@ -1,20 +1,21 @@
+import importlib.util
 import json
 import os
 
-os.environ.setdefault("KERAS_BACKEND", "torch")
+os.environ.setdefault(
+    "KERAS_BACKEND",
+    "torch" if importlib.util.find_spec("torch") else "tensorflow"
+)
 
 import keras
-
 from keras import layers
 
-# This is the VGG16 layout: 13 conv layers as 2-2-3-3-3.
 VGG16 = [(64, 2), (128, 2), (256, 3), (512, 3), (512, 3)]
 
-# Lighter variant for CPU training / small datasets.
 VGG_SMALL = [(32, 2), (64, 2), (128, 3), (256, 3)]
 
+
 def vgg_block(model, filters, n_conv):
-    """n_conv x (Conv3x3 -> BatchNorm) then halve the resolution."""
 
     for _ in range(n_conv):
         model.add(layers.Conv2D(filters, 3, padding="same", activation="relu"))
@@ -28,10 +29,8 @@ def build_model(input_shape, num_classes, blocks=VGG16):
     model = keras.Sequential()
     model.add(keras.Input(shape=input_shape))
 
-    # Scale 0-255 to 0-1 inside the model, so inference cannot forget to
     model.add(layers.Rescaling(1.0 / 255))
 
-    # Augmentation, active during fit() only
     model.add(layers.RandomFlip("horizontal"))
     model.add(layers.RandomRotation(0.1))
     model.add(layers.RandomZoom(0.1))
@@ -67,12 +66,14 @@ def train_model(X_train, y_train, X_val, y_val, num_classes,
     model.summary()
 
     callbacks = [
-            keras.callbacks.EarlyStopping(
-        monitor="val_accuracy", mode="max", patience=6, restore_best_weights=True
-    ),
-    keras.callbacks.ReduceLROnPlateau(
-        monitor="val_accuracy", mode="max", factor=0.5, patience=3, min_lr=1e-6
-    ),
+        keras.callbacks.EarlyStopping(
+            monitor="val_accuracy", mode="max",
+            patience=6, restore_best_weights=True
+        ),
+        keras.callbacks.ReduceLROnPlateau(
+            monitor="val_accuracy", mode="max",
+            factor=0.5, patience=3, min_lr=1e-6
+        ),
     ]
 
     print("\nTraining...")
@@ -100,7 +101,7 @@ def train_model(X_train, y_train, X_val, y_val, num_classes,
 
 def predict_model(model, X_test):
 
-    probabilities = model.predict(X_test, verbose=0)
+    probabilities = model.predict(X_test, batch_size=128, verbose=0)
 
     if probabilities.shape[-1] == 1:
         return (probabilities.ravel() > 0.5).astype(int)

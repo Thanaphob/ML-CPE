@@ -1,13 +1,19 @@
+import importlib.util
 import json
 import os
 
+os.environ.setdefault(
+    "KERAS_BACKEND",
+    "torch" if importlib.util.find_spec("torch") else "tensorflow"
+)
+
+import keras
 import matplotlib
 
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
-from tensorflow import keras
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
@@ -17,14 +23,12 @@ N_SAMPLES = 8
 
 def test_vgg(n_samples=N_SAMPLES):
 
-    # Load model and test set
     model = keras.models.load_model(f"{OUTPUT_DIR}/vgg_model.keras")
     X_test = np.load(f"{OUTPUT_DIR}/X_test.npy")
     y_test = np.load(f"{OUTPUT_DIR}/y_test.npy")
     with open(f"{OUTPUT_DIR}/classes.json") as f:
         classes = json.load(f)
 
-    # Pick random images (no seed -> different every run)
     index = np.random.choice(len(X_test), n_samples, replace=False)
     X_sample = X_test[index]
     y_sample = y_test[index]
@@ -33,7 +37,6 @@ def test_vgg(n_samples=N_SAMPLES):
     if probabilities.shape[-1] == 1:
         probabilities = probabilities.ravel()
         predictions = (probabilities > 0.5).astype(int)
-        # Confidence in the predicted class, not in class 1
         confidence = np.where(predictions == 1, probabilities, 1 - probabilities)
     else:
         predictions = probabilities.argmax(axis=1)

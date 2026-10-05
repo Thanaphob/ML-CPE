@@ -1,0 +1,19 @@
+config,group,img_size,conv_layers,dense_units,params,trainable_params,epochs,train_acc,val_acc,test_acc,train_time_s
+"Small (4 conv, 64 neurons)",scratch,48,4,64,407759,406799,3,0.9067,0.7877,0.7787,224.0
+"Small (4 conv, 64 neurons)",scratch,48,4,64,407759,406799,6,0.9589,0.8263,0.816,224.0
+"Small (4 conv, 64 neurons)",scratch,48,4,64,407759,406799,10,0.978,0.964,0.9567,224.0
+"Medium (7 conv, 256 neurons)",scratch,48,7,256,654639,653231,3,0.9217,0.8257,0.8363,431.6
+"Medium (7 conv, 256 neurons)",scratch,48,7,256,654639,653231,6,0.9607,0.874,0.881,431.6
+"Medium (7 conv, 256 neurons)",scratch,48,7,256,654639,653231,10,0.9749,0.9683,0.969,431.6
+"Large (10 conv, 512-256 neurons)",scratch,48,10,512-256,2182063,2179375,3,0.8574,0.8103,0.808,550.6
+"Large (10 conv, 512-256 neurons)",scratch,48,10,512-256,2182063,2179375,6,0.9228,0.898,0.898,550.6
+"Large (10 conv, 512-256 neurons)",scratch,48,10,512-256,2182063,2179375,10,0.9539,0.9367,0.9293,550.6
+VGG16 (pretrained),pretrained,128,-,-,14722383,7695,3,0.9414,0.9823,0.9823,593.5
+VGG16 (pretrained),pretrained,128,-,-,14722383,7695,6,0.9723,0.9903,0.9923,593.5
+VGG16 (pretrained),pretrained,128,-,-,14722383,7695,10,0.9819,0.995,0.995,593.5
+MobileNetV2 (pretrained),pretrained,128,-,-,2277199,19215,3,0.9921,0.996,0.9943,172.7
+MobileNetV2 (pretrained),pretrained,128,-,-,2277199,19215,6,0.9961,0.9973,0.9963,172.7
+MobileNetV2 (pretrained),pretrained,128,-,-,2277199,19215,10,0.9981,0.9977,0.997,172.7
+EfficientNetB0 (pretrained),pretrained,128,-,-,4068786,19215,3,0.9932,0.9953,0.9953,194.8
+EfficientNetB0 (pretrained),pretrained,128,-,-,4068786,19215,6,0.997,0.9967,0.9967,194.8
+EfficientNetB0 (pretrained),pretrained,128,-,-,4068786,19215,10,0.9985,0.997,0.998,194.8

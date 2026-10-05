@@ -19,7 +19,7 @@ Repository นี้จัดทำขึ้นเพื่อรวบรวม
 | [LAB05](./LAB05) | Support Vector Machine (SVM) | ✅ |
 | [LAB06](./LAB06) | Neural Network (NN) | ✅ |
 | [LAB07](./LAB07) | Convolutional Neural Network (CNN) | ✅ |
-| [LAB08](./LAB08) | Updating | ⏳ |
+| [LAB08](./LAB08) | Deep Convolutional Neural Network (DCNN) | ✅ |
 | [LAB09](./LAB09) | Updating | ⏳ |
 | [LAB10](./LAB10) | Updating | ⏳ |
 | [Sell_Proj](./Sell_Proj) | Project / Sell Ready | ✅ |

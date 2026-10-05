@@ -7,13 +7,11 @@ def preprocess_image(image, img_size=100):
     if image is None or image.size == 0:
         return None
 
-    # cv2 reads BGR, convert to RGB
     if image.ndim == 2:
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
     else:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-    # INTER_AREA is the right filter for shrinking
     image = cv2.resize(
         image,
         (img_size, img_size),

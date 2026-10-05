@@ -1,5 +1,2 @@
 **/data/
-**/output/
-**/outputs/
-*.npy
 **/__pycache__/

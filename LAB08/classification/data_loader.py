@@ -1,20 +1,19 @@
 import os
+from concurrent.futures import ThreadPoolExecutor
+
 import cv2
 import numpy as np
 
 from preprocessing import preprocess_image
 
+cv2.setNumThreads(1)
+
 VALID_EXT = (".jpg", ".jpeg", ".png", ".bmp")
 SPLITS = ("train", "validation", "test")
+WORKERS = max(1, min(8, os.cpu_count() or 1))
 
 
 def find_dataset_root(data_path):
-    """Find the folder that contains train/, validation/ and test/.
-
-    Kaggle's zip often nests the data one or two levels deep
-    (e.g. 'Vegetable Image Dataset/Vegetable Images/train'),
-    so search below data_path instead of assuming a fixed layout.
-    """
 
     if not os.path.isdir(data_path):
         raise FileNotFoundError(
@@ -39,58 +38,61 @@ def detect_classes(split_path):
     )
 
 
+def read_image(path, img_size):
+    return preprocess_image(cv2.imread(path), img_size)
+
+
 def load_split(split_path, classes, img_size=128, max_per_class=None):
-    """Load one split (train / validation / test) using a fixed class order."""
 
     images = []
     labels = []
 
-    for label, class_name in enumerate(classes):
-        class_path = os.path.join(split_path, class_name)
-        if not os.path.isdir(class_path):
-            print(f"  Warning: class '{class_name}' missing in {split_path}")
-            continue
-
-        filenames = sorted(
-            f for f in os.listdir(class_path)
-            if f.lower().endswith(VALID_EXT)
-        )
-
-        loaded = 0
-        skipped = 0
-        for filename in filenames:
-            if max_per_class and loaded >= max_per_class:
-                break
-
-            image = cv2.imread(os.path.join(class_path, filename))
-
-            # Resize here so full-size images are not all kept in memory
-            image = preprocess_image(image, img_size)
-
-            # Skip unreadable or damaged images
-            if image is None:
-                skipped += 1
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        for label, class_name in enumerate(classes):
+            class_path = os.path.join(split_path, class_name)
+            if not os.path.isdir(class_path):
+                print(f"  Warning: class '{class_name}' missing in {split_path}")
                 continue
 
-            images.append(image)
-            labels.append(label)
-            loaded += 1
+            filenames = sorted(
+                f for f in os.listdir(class_path)
+                if f.lower().endswith(VALID_EXT)
+            )
 
-        print(f"  {class_name:<14}: {loaded} images ({skipped} skipped)")
+            loaded = 0
+            skipped = 0
+            position = 0
+            while position < len(filenames):
+                if max_per_class:
+                    take = max_per_class - loaded
+                    if take <= 0:
+                        break
+                else:
+                    take = len(filenames) - position
+
+                chunk = filenames[position:position + take]
+                position += len(chunk)
+                paths = [os.path.join(class_path, f) for f in chunk]
+
+                for image in pool.map(read_image, paths,
+                                      [img_size] * len(paths)):
+                    if image is None:
+                        skipped += 1
+                    else:
+                        images.append(image)
+                        labels.append(label)
+                        loaded += 1
+
+            print(f"  {class_name:<14}: {loaded} images ({skipped} skipped)")
 
     return np.stack(images), np.array(labels)
 
 
 def load_data(data_path, img_size=128, max_per_class=None):
-    """Load the pre-split dataset.
-
-    Returns (X_train, y_train, X_val, y_val, X_test, y_test, classes).
-    """
 
     root = find_dataset_root(data_path)
     print("Dataset root:", root)
 
-    # Folder names may differ in case (Train / train), so map them first
     folders = {d.lower(): d for d in os.listdir(root)
                if os.path.isdir(os.path.join(root, d))}
 

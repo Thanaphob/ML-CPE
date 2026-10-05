@@ -1,34 +1,14 @@
-"""Compare DCNN configurations and numbers of epochs (LAB 08).
-
-Part A  - small VGG-style CNNs built from scratch (different numbers of
-          convolutional layers and neurons).
-Part B  - well-known architectures from the lecture table (VGG16, InceptionV3,
-          MobileNet, EfficientNet, ResNet ...) with ImageNet weights. The
-          pretrained body is frozen and only a new classifier head is trained.
-
-Every model is trained ONCE for max(CHECKPOINTS) epochs with a constant
-learning rate and no early stopping. Nothing depends on the planned number of
-epochs, so the model after epoch 5 is the same as one trained for exactly
-5 epochs, and a single run gives the accuracy at every checkpoint.
-
-Outputs (in outputs/experiments/):
-    results.csv                accuracy of every model at every checkpoint
-    history_<name>.json        per-epoch train/validation accuracy and loss
-    model_<name>.keras         trained from-scratch models (Part A only)
-    accuracy_curves.png        validation accuracy / loss per epoch
-    checkpoint_comparison.png  test accuracy at each checkpoint
-
-AlexNet and Inception-V1 from the table are not in keras.applications, so
-they are not included.
-"""
-
 import csv
 import gc
+import importlib.util
 import json
 import os
 import time
 
-os.environ.setdefault("KERAS_BACKEND", "torch")
+os.environ.setdefault(
+    "KERAS_BACKEND",
+    "torch" if importlib.util.find_spec("torch") else "tensorflow"
+)
 
 import keras
 import matplotlib
@@ -43,20 +23,17 @@ from data_loader import load_data
 from preprocessing import to_features
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.join(BASE_DIR, "..", "data")
+DATA_PATH = os.path.join(BASE_DIR,"data")
 OUT_DIR = os.path.join(BASE_DIR, "outputs", "experiments")
 
-MAX_PER_CLASS = None     # None = all images
+MAX_PER_CLASS = None
 BATCH_SIZE = 64
 SEED = 42
-CHECKPOINTS = (3, 6, 10)   # epochs to compare; training runs to the largest
+CHECKPOINTS = (3, 6, 10)
 
-# ---- Part A: from-scratch models ------------------------------------------
-SCRATCH_IMG_SIZE = 48    # same as main.py
+SCRATCH_IMG_SIZE = 48
 SCRATCH_LR = 1e-3
 
-# name -> (conv blocks as (filters, n_conv), dense layer sizes)
-# Set SCRATCH_CONFIGS = {} to skip Part A.
 SCRATCH_CONFIGS = {
     "Small (4 conv, 64 neurons)": (
         [(32, 1), (64, 1), (128, 1), (256, 1)], (64,)),
@@ -66,11 +43,9 @@ SCRATCH_CONFIGS = {
         [(32, 2), (64, 2), (128, 3), (256, 3)], (512, 256)),
 }
 
-# ---- Part B: pretrained models from the table ------------------------------
-PRETRAINED_IMG_SIZE = 128   # ImageNet models need larger images than 48
+PRETRAINED_IMG_SIZE = 128
 PRETRAINED_LR = 1e-3
 
-# label -> (keras.applications name, input preprocessing mode)
 PRETRAINED_ALL = {
     "VGG16": ("VGG16", "caffe"),
     "VGG19": ("VGG19", "caffe"),
@@ -83,19 +58,14 @@ PRETRAINED_ALL = {
     "EfficientNetB0": ("EfficientNetB0", "none"),
 }
 
-# Models to actually run (the heavy ones are left out by default to save time;
-# add "ResNet152", "InceptionResNetV2", "VGG19" ... here if you want them).
-# Set PRETRAINED_RUN = [] to skip Part B.
 PRETRAINED_RUN = ["VGG16", "MobileNetV2", "EfficientNetB0"]
+
+CAFFE_MEAN = np.array([103.939, 116.779, 123.68], dtype="float32")
 
 
 def slug(name):
     return "".join(c if c.isalnum() else "_" for c in name).strip("_")
 
-
-# ---------------------------------------------------------------------------
-# Model builders
-# ---------------------------------------------------------------------------
 
 def build_scratch(input_shape, num_classes, blocks, dense_units):
 
@@ -103,7 +73,6 @@ def build_scratch(input_shape, num_classes, blocks, dense_units):
     model.add(keras.Input(shape=input_shape))
     model.add(layers.Rescaling(1.0 / 255))
 
-    # Augmentation, active during fit() only
     model.add(layers.RandomFlip("horizontal"))
     model.add(layers.RandomRotation(0.1))
     model.add(layers.RandomZoom(0.1))
@@ -130,49 +99,7 @@ def build_scratch(input_shape, num_classes, blocks, dense_units):
     return model
 
 
-def caffe_preprocess(x):
-    """VGG / ResNet (v1) expect BGR images with the ImageNet mean removed."""
-    x = keras.ops.flip(x, axis=-1)   # RGB -> BGR
-    mean = keras.ops.convert_to_tensor([103.939, 116.779, 123.68],
-                                       dtype="float32")
-    return x - mean
-
-
-def build_pretrained(app_name, mode, input_shape, num_classes):
-
-    base = getattr(keras.applications, app_name)(
-        weights="imagenet", include_top=False, input_shape=input_shape)
-    base.trainable = False   # frozen; BatchNorm stays in inference mode
-
-    model = keras.Sequential()
-    model.add(keras.Input(shape=input_shape))
-    model.add(layers.RandomFlip("horizontal"))
-
-    if mode == "tf":                       # scale to [-1, 1]
-        model.add(layers.Rescaling(1.0 / 127.5, offset=-1.0))
-    elif mode == "caffe":
-        model.add(layers.Lambda(caffe_preprocess))
-    # mode == "none": EfficientNet rescales 0-255 inputs by itself
-
-    model.add(base)
-    model.add(layers.GlobalAveragePooling2D())
-    model.add(layers.Dropout(0.3))
-    model.add(layers.Dense(num_classes, activation="softmax"))
-
-    model.compile(
-        optimizer=keras.optimizers.Adam(PRETRAINED_LR),
-        loss="sparse_categorical_crossentropy",
-        metrics=["accuracy"],
-    )
-    return model
-
-
-# ---------------------------------------------------------------------------
-# Training
-# ---------------------------------------------------------------------------
-
 class CheckpointEval(keras.callbacks.Callback):
-    """Record train / validation / test accuracy at the chosen epochs."""
 
     def __init__(self, X_val, y_val, X_test, y_test, checkpoints):
         super().__init__()
@@ -196,7 +123,34 @@ class CheckpointEval(keras.callbacks.Callback):
         }
 
 
-def train_and_record(name, model, info, data, save_model):
+def make_rows(name, info, n_params, n_trainable, records, seconds):
+
+    rows = []
+    for epochs in sorted(records):
+        r = records[epochs]
+        rows.append({
+            "config": name,
+            "group": info["group"],
+            "img_size": info["img_size"],
+            "conv_layers": info["conv_layers"],
+            "dense_units": info["dense_units"],
+            "params": n_params,
+            "trainable_params": n_trainable,
+            "epochs": epochs,
+            "train_acc": round(r["train_acc"], 4),
+            "val_acc": round(r["val_acc"], 4),
+            "test_acc": round(r["test_acc"], 4),
+            "train_time_s": round(seconds, 1),
+        })
+    return rows
+
+
+def save_history(name, hist):
+    with open(os.path.join(OUT_DIR, f"history_{slug(name)}.json"), "w") as f:
+        json.dump({k: [float(v) for v in vs] for k, vs in hist.items()}, f)
+
+
+def train_scratch(name, model, info, data):
 
     X_train, y_train, X_val, y_val, X_test, y_test = data
 
@@ -218,32 +172,131 @@ def train_and_record(name, model, info, data, save_model):
     )
     seconds = time.time() - start
 
-    if save_model:
-        model.save(os.path.join(OUT_DIR, f"model_{slug(name)}.keras"))
-    with open(os.path.join(OUT_DIR, f"history_{slug(name)}.json"), "w") as f:
-        json.dump({k: [float(v) for v in vs]
-                   for k, vs in history.history.items()}, f)
+    model.save(os.path.join(OUT_DIR, f"model_{slug(name)}.keras"))
+    save_history(name, history.history)
 
-    rows = []
-    for epochs in sorted(cb.records):
-        r = cb.records[epochs]
-        rows.append({
-            "config": name,
-            "group": info["group"],
-            "img_size": info["img_size"],
-            "conv_layers": info["conv_layers"],
-            "dense_units": info["dense_units"],
-            "params": n_params,
-            "trainable_params": n_trainable,
-            "epochs": epochs,
-            "train_acc": round(r["train_acc"], 4),
-            "val_acc": round(r["val_acc"], 4),
-            "test_acc": round(r["test_acc"], 4),
-            "train_time_s": round(seconds, 1),
-        })
+    rows = make_rows(name, info, n_params, n_trainable, cb.records, seconds)
 
     hist = history.history
-    del model
+    keras.backend.clear_session()
+    gc.collect()
+
+    return rows, hist
+
+
+def preprocess_batch(batch, mode):
+
+    batch = batch.astype("float32")
+    if mode == "tf":
+        return batch / 127.5 - 1.0
+    if mode == "caffe":
+        return np.ascontiguousarray(batch[..., ::-1]) - CAFFE_MEAN
+    return batch
+
+
+def extract_features(base, X, mode, flip, tag, batch_size=64):
+
+    outputs = []
+    total = len(X)
+
+    for start in range(0, total, batch_size):
+        batch = X[start:start + batch_size]
+        if flip:
+            batch = np.ascontiguousarray(batch[:, :, ::-1, :])
+        outputs.append(np.asarray(
+            base.predict_on_batch(preprocess_batch(batch, mode))))
+        if (start // batch_size) % 20 == 0:
+            print(f"\r  {tag}: {min(start + batch_size, total)}/{total}",
+                  end="", flush=True)
+
+    print(f"\r  {tag}: {total}/{total}")
+    return np.concatenate(outputs)
+
+
+def train_pretrained(label, app_name, mode, data, num_classes):
+
+    X_train, y_train, X_val, y_val, X_test, y_test = data
+    name = f"{label} (pretrained)"
+    info = {
+        "group": "pretrained",
+        "img_size": PRETRAINED_IMG_SIZE,
+        "conv_layers": "-",
+        "dense_units": "-",
+    }
+
+    print(f"\n=== {name} | extracting features | "
+          f"image {PRETRAINED_IMG_SIZE}px ===")
+    start = time.time()
+
+    base = getattr(keras.applications, app_name)(
+        weights="imagenet", include_top=False,
+        input_shape=X_train.shape[1:], pooling="avg")
+    base.trainable = False
+    base_params = base.count_params()
+
+    F_train = extract_features(base, X_train, mode, False, "train")
+    F_train_flip = extract_features(base, X_train, mode, True, "train flipped")
+    F_val = extract_features(base, X_val, mode, False, "validation")
+    F_test = extract_features(base, X_test, mode, False, "test")
+
+    del base
+    keras.backend.clear_session()
+    gc.collect()
+
+    keras.utils.set_random_seed(SEED)
+    head = keras.Sequential([
+        keras.Input(shape=(F_train.shape[1],)),
+        layers.Dropout(0.3),
+        layers.Dense(num_classes, activation="softmax"),
+    ])
+    head.compile(
+        optimizer=keras.optimizers.Adam(PRETRAINED_LR),
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"],
+    )
+
+    n_trainable = head.count_params()
+    n_params = base_params + n_trainable
+    print(f"  params: {n_params:,} (trainable {n_trainable:,})")
+
+    total_epochs = max(CHECKPOINTS)
+    rng = np.random.default_rng(SEED)
+    hist = {"accuracy": [], "loss": [], "val_accuracy": [], "val_loss": []}
+    records = {}
+
+    for epoch in range(1, total_epochs + 1):
+        flip_mask = rng.random(len(y_train)) < 0.5
+        X_epoch = np.where(flip_mask[:, None], F_train_flip, F_train)
+        h = head.fit(
+            X_epoch, y_train,
+            validation_data=(F_val, y_val),
+            batch_size=BATCH_SIZE,
+            epochs=1,
+            verbose=0,
+        ).history
+        for key in hist:
+            hist[key].append(float(h[key][0]))
+
+        print(f"Epoch {epoch}/{total_epochs} - "
+              f"loss: {hist['loss'][-1]:.4f} - "
+              f"accuracy: {hist['accuracy'][-1]:.4f} - "
+              f"val_loss: {hist['val_loss'][-1]:.4f} - "
+              f"val_accuracy: {hist['val_accuracy'][-1]:.4f}")
+
+        if epoch in CHECKPOINTS:
+            _, test_acc = head.evaluate(F_test, y_test,
+                                        batch_size=256, verbose=0)
+            records[epoch] = {
+                "train_acc": hist["accuracy"][-1],
+                "val_acc": hist["val_accuracy"][-1],
+                "test_acc": float(test_acc),
+            }
+
+    seconds = time.time() - start
+    save_history(name, hist)
+    rows = make_rows(name, info, n_params, n_trainable, records, seconds)
+
+    del head, F_train, F_train_flip, F_val, F_test
     keras.backend.clear_session()
     gc.collect()
 
@@ -260,10 +313,6 @@ def load_split_data(img_size):
           f"| classes {len(classes)} | image {img_size}px")
     return data, len(classes)
 
-
-# ---------------------------------------------------------------------------
-# Plots
-# ---------------------------------------------------------------------------
 
 def plot_curves(histories, save_path):
 
@@ -328,10 +377,6 @@ def save_csv(results):
         writer.writerows(results)
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
 def main():
 
     os.makedirs(OUT_DIR, exist_ok=True)
@@ -339,13 +384,12 @@ def main():
     results = []
     histories = {}
 
-    # Part A: from-scratch configurations
     if SCRATCH_CONFIGS:
         print("\n##### Part A: from-scratch models #####")
         data, num_classes = load_split_data(SCRATCH_IMG_SIZE)
 
         for name, (blocks, dense_units) in SCRATCH_CONFIGS.items():
-            keras.utils.set_random_seed(SEED)   # same start for every model
+            keras.utils.set_random_seed(SEED)
             model = build_scratch(data[0].shape[1:], num_classes,
                                   blocks, dense_units)
             info = {
@@ -354,36 +398,25 @@ def main():
                 "conv_layers": sum(n for _, n in blocks),
                 "dense_units": "-".join(str(u) for u in dense_units),
             }
-            rows, hist = train_and_record(name, model, info, data,
-                                          save_model=True)
+            rows, hist = train_scratch(name, model, info, data)
+            del model
             results.extend(rows)
             histories[name] = hist
-            save_csv(results)   # keep progress if interrupted
+            save_csv(results)
 
         del data
         gc.collect()
 
-    # Part B: pretrained architectures
     if PRETRAINED_RUN:
         print("\n##### Part B: pretrained models (frozen body) #####")
         data, num_classes = load_split_data(PRETRAINED_IMG_SIZE)
 
         for label in PRETRAINED_RUN:
             app_name, mode = PRETRAINED_ALL[label]
-            name = f"{label} (pretrained)"
-            keras.utils.set_random_seed(SEED)
-            model = build_pretrained(app_name, mode, data[0].shape[1:],
-                                     num_classes)
-            info = {
-                "group": "pretrained",
-                "img_size": PRETRAINED_IMG_SIZE,
-                "conv_layers": "-",
-                "dense_units": "-",
-            }
-            rows, hist = train_and_record(name, model, info, data,
-                                          save_model=False)
+            rows, hist = train_pretrained(label, app_name, mode,
+                                          data, num_classes)
             results.extend(rows)
-            histories[name] = hist
+            histories[f"{label} (pretrained)"] = hist
             save_csv(results)
 
         del data
