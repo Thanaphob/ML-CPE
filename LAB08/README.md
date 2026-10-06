@@ -14,19 +14,19 @@
 
 1. ดาวน์โหลดชุดข้อมูลจากลิงก์ Kaggle ด้านบนแล้วแตกไฟล์
 2. วางไว้ในโฟลเดอร์ `data/` ให้ภายในมี `train`, `validation`, `test` (จะซ้อนอยู่ในโฟลเดอร์ย่อยอีกชั้นก็ได้ เช่น `data/Vegetable Images/train` โปรแกรมค้นหาให้เอง)
-3. ค่าเริ่มต้นของ `DATA_PATH` ใน `main.py` และ `experiments.py` คือ `../data` (โฟลเดอร์ `data` อยู่ระดับเดียวกับ `classification`) ถ้าวางไว้ที่อื่นให้แก้ค่า `DATA_PATH`
+3. ค่าเริ่มต้นของ `DATA_PATH` ใน `main.py` และ `experiments.py` คือ `data` (โฟลเดอร์ `data` อยู่ในโฟลเดอร์ `classification`) ถ้าวางไว้ที่อื่นให้แก้ค่า `DATA_PATH`
 
 ## โครงสร้างโปรเจกต์
 
 ```text
 LAB08/
-├── data/                           # ชุดข้อมูลจาก Kaggle (ไม่อยู่ใน git)
-│   └── Vegetable Images/
-│       ├── train/
-│       ├── validation/
-│       └── test/
-│
 └── classification/
+    ├── data/                       # ชุดข้อมูลจาก Kaggle (ไม่อยู่ใน git)
+    │   └── Vegetable Images/
+    │       ├── train/
+    │       ├── validation/
+    │       └── test/
+    │
     ├── main.py                     # ขั้นตอนหลักในการเทรนโมเดล
     ├── data_loader.py              # โหลดภาพจาก train/validation/test และข้ามไฟล์ที่เสีย
     ├── preprocessing.py            # ปรับขนาดภาพ และแปลง BGR เป็น RGB
@@ -58,16 +58,10 @@ LAB08/
 
 ## การติดตั้งและการรัน
 
-ต้องใช้ Python 3.10 ขึ้นไป ติดตั้งไลบรารีอย่างใดอย่างหนึ่ง (โปรแกรมเลือก backend ให้เอง: ถ้ามี `torch` จะใช้ torch ถ้าไม่มีจะใช้ tensorflow)
+ต้องใช้ Python 3.10 ขึ้นไป ติดตั้งไลบรารีที่ต้องใช้ด้วย
 
 ```bash
-pip install keras torch opencv-python scikit-learn matplotlib numpy
-```
-
-หรือ
-
-```bash
-pip install tensorflow opencv-python scikit-learn matplotlib numpy
+pip install -r requirements.txt
 ```
 
 จากนั้นรันตามลำดับ
@@ -81,7 +75,7 @@ python experiments.py
 
 ## ขั้นตอนของ main.py
 
-1. โหลดภาพจาก `train`, `validation`, `test` และปรับขนาดเป็น 48×48
+1. โหลดภาพจาก `train`, `validation`, `test` และปรับขนาดเป็น 64×64
 2. แปลงข้อมูลเป็นอาร์เรย์ (uint8) พร้อมใช้งาน
 3. บันทึกข้อมูลที่ใช้ทดสอบลง `outputs/`
 4. เทรนโมเดล VGG
