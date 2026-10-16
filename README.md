@@ -21,7 +21,7 @@ Repository นี้จัดทำขึ้นเพื่อรวบรวม
 | [LAB07](./LAB07) | Convolutional Neural Network (CNN) | ✅ |
 | [LAB08](./LAB08) | Deep Convolutional Neural Network (DCNN) | ✅ |
 | [LAB09](./LAB09) | Updating | ⏳ |
-| [LAB10](./LAB10) | Updating | ⏳ |
+| [LAB10](./LAB10) | Object Detection II | ✅ |
 | [Sell_Proj](./Sell_Proj) | Project / Sell Ready | ✅ |
 | [Final-Project](./Final-Project) | Final Project | ⏳ |
 
