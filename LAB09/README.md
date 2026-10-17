@@ -103,10 +103,10 @@ python realtime_test.py
 
 | Metric | 01-R-CNN | 02-Fast-R-CNN |
 |---|---|---|
-| Accuracy | *(รัน evaluate.py แล้วดูใน outputs/evaluation.json)* | 0.760 |
-| Precision (macro) | — | 0.753 |
-| Recall (macro) | — | 0.758 |
-| F1 (macro) | — | 0.754 |
+| Accuracy | 0.92 | 0.760 |
+| Precision (macro) | 0.92 | 0.753 |
+| Recall (macro) | 0.91 | 0.758 |
+| F1 (macro) | 0.91 | 0.754 |
 
 ผลของ Fast R-CNN: เทรน 20 epoch (หยุดอัตโนมัติที่ epoch 6 ด้วย EarlyStopping, ใช้ weight จาก epoch 2 ที่ val_loss ดีที่สุด)
 
