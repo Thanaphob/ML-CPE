@@ -1,4 +1,4 @@
-# Lab 9 - Object Detection I: R-CNN และ Fast R-CNN
+# Lab 09 - Object Detection I: R-CNN และ Fast R-CNN
 
 ## ภาพรวม
 
