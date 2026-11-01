@@ -2,7 +2,7 @@ import cv2
 
 import config
 from hand_detector import HandDetector
-from gesture_classifier import count_fingers, classify_gesture
+from gesture_classifier import classify_gesture
 from slide_controller import SlideController
 
 
@@ -42,8 +42,7 @@ def main():
 
                 detector.draw_landmarks(frame, hand_landmarks)
 
-                fingers = count_fingers(hand_landmarks, handedness_label)
-                action, label = classify_gesture(fingers)
+                action, label = classify_gesture(hand_landmarks, handedness_label)
                 status_text = label
 
                 controller.trigger(action, label)

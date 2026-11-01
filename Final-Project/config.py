@@ -1,5 +1,5 @@
 
-COOLDOWN_SECONDS = 1.2   
+COOLDOWN_SECONDS = 1 
 DRY_RUN = False          
 CAM_INDEX = 0           
 
