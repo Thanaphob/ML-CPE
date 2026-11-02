@@ -23,6 +23,6 @@ Repository นี้จัดทำขึ้นเพื่อรวบรวม
 | [LAB09](./LAB09) | Object Detection I | ✅ |
 | [LAB10](./LAB10) | Object Detection II | ✅ |
 | [Sell_Proj](./Sell_Proj) | Project / Sell Ready | ✅ |
-| [Final-Project](./Final-Project) | Final Project | ⏳ |
+| [Final-Project](./Final-Project) | Final Project (Gesture-controlled Presentation) | ✅ |
 
 ---
