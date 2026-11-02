@@ -4,7 +4,6 @@ from landmark_utils import extract_features
 
 MODEL_PATH = "gesture_model.pkl"
 
-# ปลายนิ้วแต่ละนิ้ว (landmark id) ตามที่ MediaPipe กำหนด — ใช้เฉพาะตอน rule-based fallback
 TIP_IDS = [4, 8, 12, 16, 20]
 
 LABEL_TO_ACTION = {
@@ -18,7 +17,6 @@ _model_checked = False
 
 
 def _load_model():
-
     global _model_bundle, _model_checked
 
     if _model_checked:
@@ -26,7 +24,7 @@ def _load_model():
 
     _model_checked = True
     if os.path.isfile(MODEL_PATH):
-        import joblib  # import ตรงนี้ เผื่อเครื่องที่ยังไม่ได้ติดตั้ง sklearn/joblib แต่ไม่ได้ใช้โหมด ML
+        import joblib
         _model_bundle = joblib.load(MODEL_PATH)
         print(f"[gesture_classifier] โหลดโมเดลที่เทรนไว้จาก {MODEL_PATH} สำเร็จ (ML mode)")
     else:
@@ -67,12 +65,20 @@ def _classify_rule_based(hand_landmarks, handedness_label):
 
 
 def classify_gesture(hand_landmarks, handedness_label):
-
+    
     bundle = _load_model()
 
     if bundle is not None:
         features = extract_features(hand_landmarks)
-        predicted_label = bundle["model"].predict([features])[0]
-        return LABEL_TO_ACTION.get(predicted_label, ("IDLE", "Unknown (ML)"))
+        model = bundle["model"]
 
-    return _classify_rule_based(hand_landmarks, handedness_label)
+        predicted_label = model.predict([features])[0]
+        probabilities = model.predict_proba([features])[0]
+        confidence = max(probabilities)
+
+        action, label = LABEL_TO_ACTION.get(predicted_label, ("IDLE", "Unknown (ML)"))
+        label = f"{label} {confidence * 100:.0f}%"
+        return action, label, confidence
+
+    action, label = _classify_rule_based(hand_landmarks, handedness_label)
+    return action, label, None

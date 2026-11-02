@@ -1,3 +1,5 @@
+from collections import deque
+
 import cv2
 
 import config
@@ -22,6 +24,7 @@ def main():
 
     detector = HandDetector()
     controller = SlideController()
+    recent_actions = deque(maxlen=config.STABLE_FRAMES_REQUIRED)
 
     print("เริ่มทำงานแล้ว — กด 'q' ที่หน้าต่างกล้องเพื่อออก")
 
@@ -31,7 +34,7 @@ def main():
             if not success:
                 continue
 
-            frame = cv2.flip(frame, 1)  # กลับภาพให้เหมือนส่องกระจก ใช้งานง่ายกว่า
+            frame = cv2.flip(frame, 1)
             results = detector.process(frame)
 
             status_text = "No hand detected"
@@ -42,10 +45,23 @@ def main():
 
                 detector.draw_landmarks(frame, hand_landmarks)
 
-                action, label = classify_gesture(hand_landmarks, handedness_label)
+                action, label, confidence = classify_gesture(hand_landmarks, handedness_label)
                 status_text = label
 
-                controller.trigger(action, label)
+                if confidence is not None and confidence < config.MIN_CONFIDENCE:
+                    action = "IDLE"
+
+                recent_actions.append(action)
+
+                is_stable = (
+                    len(recent_actions) == recent_actions.maxlen
+                    and all(a == action for a in recent_actions)
+                )
+
+                if is_stable:
+                    controller.trigger(action, label)
+                else:
+                    status_text += "  (stabilizing...)"
 
             draw_overlay(frame, status_text, controller.last_label)
             cv2.imshow("Gesture Presentation Control (press 'q' to quit)", frame)

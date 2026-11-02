@@ -1,7 +1,7 @@
 import numpy as np
 
 WRIST_ID = 0
-MIDDLE_FINGER_MCP_ID = 9  # โคนนิ้วกลาง ใช้เป็นระยะอ้างอิงสำหรับ normalize ขนาดมือ
+MIDDLE_FINGER_MCP_ID = 9
 
 
 def extract_features(hand_landmarks):
@@ -11,7 +11,7 @@ def extract_features(hand_landmarks):
     )  # shape (21, 2)
 
     wrist = points[WRIST_ID]
-    relative = points - wrist  # ย้ายจุดอ้างอิงมาที่ข้อมือ
+    relative = points - wrist
 
     scale = np.linalg.norm(relative[MIDDLE_FINGER_MCP_ID])
     if scale < 1e-6:
