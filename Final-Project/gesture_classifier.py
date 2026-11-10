@@ -27,11 +27,31 @@ def _load_model():
         import joblib
         _model_bundle = joblib.load(MODEL_PATH)
         print(f"[gesture_classifier] โหลดโมเดลที่เทรนไว้จาก {MODEL_PATH} สำเร็จ (ML mode)")
+        _warm_up(_model_bundle)
     else:
         print(f"[gesture_classifier] ไม่พบ {MODEL_PATH} — ใช้ rule-based fallback แทน "
               f"(รัน collect_data.py แล้ว train_model.py เพื่อเปิดใช้ ML mode)")
 
     return _model_bundle
+
+
+def _warm_up(bundle):
+    # เรียก predict/predict_proba ปลอม ๆ 1 ครั้งตอนโหลด เพื่อให้ sklearn/numpy
+    # เตรียม internal cache, thread pool, BLAS ฯลฯ ให้พร้อมก่อน
+    # ไม่ต้องให้ค้างตอนยกมือจริงครั้งแรกในลูปวิดีโอ
+    try:
+        dummy_features = [0.0] * (21 * 2)
+        model = bundle["model"]
+        model.predict([dummy_features])
+        model.predict_proba([dummy_features])
+    except Exception as exc:  # ไม่ critical ถ้า warm-up fail ก็แค่ไม่ได้ผล ไม่ต้อง crash
+        print(f"[gesture_classifier] warm-up โมเดลไม่สำเร็จ (ไม่ร้ายแรง): {exc}")
+
+
+def preload_model():
+    """เรียกครั้งเดียวตอนเริ่มโปรแกรม ก่อนเปิดกล้อง/ลูปวิดีโอ
+    เพื่อให้การโหลดโมเดล + warm-up เกิดขึ้นล่วงหน้า ไม่ไปกระตุกตอนยกมือครั้งแรก"""
+    _load_model()
 
 
 def _count_fingers_rule_based(hand_landmarks, handedness_label):

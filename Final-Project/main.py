@@ -4,7 +4,7 @@ import cv2
 
 import config
 from hand_detector import HandDetector
-from gesture_classifier import classify_gesture
+from gesture_classifier import classify_gesture, preload_model
 from slide_controller import SlideController
 
 
@@ -17,6 +17,11 @@ def draw_overlay(frame, status_text, last_label):
 
 
 def main():
+    # โหลด + warm-up โมเดล ML ล่วงหน้าตรงนี้ (ก่อนเปิดกล้อง/เข้าลูปวิดีโอ)
+    # กันไม่ให้ไปโหลดตอนเฟรมแรกที่เจอมือ ซึ่งจะทำให้ภาพค้าง/กระตุกตอนยกมือ
+    print("กำลังโหลดโมเดล...")
+    preload_model()
+
     cap = cv2.VideoCapture(config.CAM_INDEX)
     if not cap.isOpened():
         print("เปิดกล้องไม่ได้ ลองเปลี่ยนค่า CAM_INDEX ใน config.py เป็น 1 หรือ 2 แล้วรันใหม่")
